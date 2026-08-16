@@ -11,7 +11,7 @@
   --amber:#B87A1A; --amber-lt:#FDF3DC; --red:#B83030; --red-lt:#F9E0E0;
   --blue:#2A5080; --blue-lt:#DDE8F5; --shadow:0 1px 4px rgba(28,23,18,0.08);
 }
-,::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--cream);color:var(--ink);font-family:'Georgia',serif;min-height:100vh;}
 
 /* ROLE SCREEN */
@@ -509,15 +509,15 @@ let syncInterval = null;
 // ══════════════════════════════════════════════════
 const SUPERVISOR_PAGES = [
   {id:'dashboard',icon:'◎',label:'Dashboard'},
-  {id:'pedidos',icon:'↗️',label:'Pedidos',badge:true},
+  {id:'pedidos',icon:'↗',label:'Pedidos',badge:true},
   {id:'alimentos',icon:'⬡',label:'Alimentos'},
-  {id:'descartaveis',icon:'◻️',label:'Descartáveis'},
+  {id:'descartaveis',icon:'◻',label:'Descartáveis'},
   {id:'relatorio',icon:'≡',label:'Relatório'},
   {id:'barracas',icon:'⊞',label:'Por barraca'},
 ];
 const ESTOQUE_PAGES = [
-  {id:'pedidos',icon:'↗️',label:'Pedidos',badge:true},
-  {id:'descartaveis',icon:'◻️',label:'Estoque'},
+  {id:'pedidos',icon:'↗',label:'Pedidos',badge:true},
+  {id:'descartaveis',icon:'◻',label:'Estoque'},
 ];
 
 function escolherPapel(role) {
@@ -578,7 +578,7 @@ function iniciarApp() {
     btn.className = 'nav-item' + (i === 0 ? ' active' : '');
     btn.id = 'nav-' + p.id;
     btn.onclick = () => showPage(p.id);
-    btn.innerHTML = <span class="ni">${p.icon}</span> ${p.label}${p.badge ? '<span class="nav-badge" id="badge-pend">0</span>' : ''};
+    btn.innerHTML = `<span class="ni">${p.icon}</span> ${p.label}${p.badge ? '<span class="nav-badge" id="badge-pend">0</span>' : ''}`;
     nav.appendChild(btn);
   });
 
@@ -718,11 +718,11 @@ function renderPedidoTable() {
   tbody.innerHTML = list.map(p => {
     const bc = {Pendente:'b-pend','A caminho':'b-onway',Entregue:'b-done',Devolução:'b-dev'}[p.status] || 'b-low';
     let btns = '';
-    if (p.status === 'Pendente') btns = <button class="btn" onclick="setStatus('${p.id}','A caminho')">Saiu ▶️</button>;
-    else if (p.status === 'A caminho') btns = <button class="btn success" onclick="setStatus('${p.id}','Entregue')">✓ Entregue</button> <button class="btn" onclick="setStatus('${p.id}','Pendente')">↩️</button>;
-    else btns = <button class="btn" onclick="setStatus('${p.id}','A caminho')">↩️ Reverter</button>;
+    if (p.status === 'Pendente') btns = `<button class="btn" onclick="setStatus('${p.id}','A caminho')">Saiu ▶</button>`;
+    else if (p.status === 'A caminho') btns = `<button class="btn success" onclick="setStatus('${p.id}','Entregue')">✓ Entregue</button> <button class="btn" onclick="setStatus('${p.id}','Pendente')">↩</button>`;
+    else btns = `<button class="btn" onclick="setStatus('${p.id}','A caminho')">↩ Reverter</button>`;
     btns += ` <button class="btn danger" onclick="deletarPedido('${p.id}')">✕</button>`;
-    return <tr><td>${p.hora}</td><td>${p.barraca}</td><td>${p.produto}</td><td class="num">${fmt(p.qtd)}</td><td><span class="badge ${bc}">${p.status}</span></td><td>${btns}</td></tr>;
+    return `<tr><td>${p.hora}</td><td>${p.barraca}</td><td>${p.produto}</td><td class="num">${fmt(p.qtd)}</td><td><span class="badge ${bc}">${p.status}</span></td><td>${btns}</td></tr>`;
   }).join('');
 }
 
@@ -745,23 +745,23 @@ function renderDash() {
   const alerts = alimentos.filter(a=>{const s=a.arrecadado-a.entregue+a.devolvido;return (s<=0&&a.necessidade>0)||(s<a.necessidade*.15&&a.necessidade>0);}).map(a=>{
     const s=a.arrecadado-a.entregue+a.devolvido;const crit=s<=0;
     return `<div style="background:${crit?'var(--red-lt)':'var(--amber-lt)'};border:1px solid ${crit?'var(--red)':'var(--amber)'};border-radius:8px;padding:8px 14px;font-size:13px;color:${crit?'var(--red)':'var(--amber)'};margin-bottom:6px">
-      ${crit?'⚠️':'⚡'} <strong>${a.nome}</strong> — ${crit?'esgotado':'crítico'}: saldo ${fmt(s)} · necessidade ${fmt(a.necessidade)}
+      ${crit?'⚠':'⚡'} <strong>${a.nome}</strong> — ${crit?'esgotado':'crítico'}: saldo ${fmt(s)} · necessidade ${fmt(a.necessidade)}
     </div>`;
   });
   const strip=document.getElementById('alert-strip');
-  if(strip) strip.innerHTML=alerts.length?<div style="margin-bottom:1.25rem">${alerts.join('')}</div>:'';
+  if(strip) strip.innerHTML=alerts.length?`<div style="margin-bottom:1.25rem">${alerts.join('')}</div>`:'';
 
   const recent=pedidos.slice(0,6);
   const tbody=document.getElementById('tbl-recentes');
   if(tbody) tbody.innerHTML=recent.length?recent.map(p=>{
     const bc={Pendente:'b-pend','A caminho':'b-onway',Entregue:'b-done',Devolução:'b-dev'}[p.status]||'b-low';
-    return <tr><td>${p.hora}</td><td>${p.barraca}</td><td>${p.produto}</td><td class="num">${fmt(p.qtd)}</td><td><span class="badge ${bc}">${p.status}</span></td></tr>;
+    return `<tr><td>${p.hora}</td><td>${p.barraca}</td><td>${p.produto}</td><td class="num">${fmt(p.qtd)}</td><td><span class="badge ${bc}">${p.status}</span></td></tr>`;
   }).join(''):'<tr class="empty-row"><td colspan="5">Nenhum pedido ainda.</td></tr>';
 
   const barUsed={Galinhada:209,Canjica:226,Caldo:364,Pastel:154,Quentão:80,'Caipirinha':777,Churros:157,Refrigerante:2465};
   const bk=Object.keys(barUsed);const bmax=Math.max(...Object.values(barUsed));
   const cb=document.getElementById('chart-barracas');
-  if(cb) cb.innerHTML=bk.map(k=><div class="bar-col"><div class="bar-val">${barUsed[k]}</div><div class="bar" style="height:${Math.round(barUsed[k]/bmax*100)}px;background:var(--rust)"></div><div class="bar-lbl">${k.length>8?k.slice(0,7)+'…':k}</div></div>).join('');
+  if(cb) cb.innerHTML=bk.map(k=>`<div class="bar-col"><div class="bar-val">${barUsed[k]}</div><div class="bar" style="height:${Math.round(barUsed[k]/bmax*100)}px;background:var(--rust)"></div><div class="bar-lbl">${k.length>8?k.slice(0,7)+'…':k}</div></div>`).join('');
 
   const topA=alimentos.filter(a=>a.necessidade>0).slice(0,6);
   const amax=Math.max(...topA.map(a=>a.arrecadado));
@@ -769,7 +769,7 @@ function renderDash() {
   if(ca) ca.innerHTML=topA.map(a=>{
     const s=Math.max(a.arrecadado-a.entregue+a.devolvido,0);
     const col=s<=0?'var(--red)':s<a.necessidade*.1?'var(--amber)':'var(--green)';
-    return <div class="bar-col"><div class="bar-val">${fmt(s)}</div><div class="bar" style="height:${Math.max(Math.round(s/amax*100),2)}px;background:${col}"></div><div class="bar-lbl">${a.nome.replace(/ \(.*\)/,'').slice(0,10)}</div></div>;
+    return `<div class="bar-col"><div class="bar-val">${fmt(s)}</div><div class="bar" style="height:${Math.max(Math.round(s/amax*100),2)}px;background:${col}"></div><div class="bar-lbl">${a.nome.replace(/ \(.*\)/,'').slice(0,10)}</div></div>`;
   }).join('');
 }
 
@@ -781,13 +781,13 @@ function renderAlimentos() {
   if(barFil!=='all'){
     if(th(2))th(2).textContent='Pedido';if(th(3))th(3).textContent='Entregue';if(th(4))th(4).textContent='Devolvido';if(th(5))th(5).textContent='Consumido';
     const bd=barraca_alim[barFil]||[];
-    tbody.innerHTML=bd.length?bd.map(r=>{const c=r.entregue-r.devolvido;return <tr><td>${r.nome}</td><td class="num">${fmt(r.pedido)}</td><td class="num">${fmt(r.pedido)}</td><td class="num">${fmt(r.entregue)}</td><td class="num">${fmt(r.devolvido)}</td><td class="num" style="font-weight:600">${fmt(c)}</td><td><span class="badge b-ok">OK</span></td></tr>}).join(''):'<tr class="empty-row"><td colspan="7">Sem dados para esta barraca.</td></tr>';
+    tbody.innerHTML=bd.length?bd.map(r=>{const c=r.entregue-r.devolvido;return `<tr><td>${r.nome}</td><td class="num">${fmt(r.pedido)}</td><td class="num">${fmt(r.pedido)}</td><td class="num">${fmt(r.entregue)}</td><td class="num">${fmt(r.devolvido)}</td><td class="num" style="font-weight:600">${fmt(c)}</td><td><span class="badge b-ok">OK</span></td></tr>`}).join(''):'<tr class="empty-row"><td colspan="7">Sem dados para esta barraca.</td></tr>';
   } else {
     if(th(2))th(2).textContent='Necessidade';if(th(3))th(3).textContent='Entregue';if(th(4))th(4).textContent='Devolvido';if(th(5))th(5).textContent='Saldo';
     tbody.innerHTML=alimentos.map(a=>{
       const s=a.arrecadado-a.entregue+a.devolvido;
       const st=s<=0?['b-zero','Esgotado']:s<a.necessidade*.1&&a.necessidade>0?['b-low','Crítico']:a.arrecadado>a.necessidade?['b-excess','Excesso']:['b-ok','OK'];
-      return <tr><td>${a.nome}</td><td class="num">${fmt(a.arrecadado)}</td><td class="num">${fmt(a.necessidade)}</td><td class="num">${fmt(a.entregue)}</td><td class="num">${fmt(a.devolvido)}</td><td class="num" style="font-weight:600;color:${s<0?'var(--red)':s<a.necessidade*.1&&a.necessidade>0?'var(--amber)':'var(--green)'}">${fmt(s)}</td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>;
+      return `<tr><td>${a.nome}</td><td class="num">${fmt(a.arrecadado)}</td><td class="num">${fmt(a.necessidade)}</td><td class="num">${fmt(a.entregue)}</td><td class="num">${fmt(a.devolvido)}</td><td class="num" style="font-weight:600;color:${s<0?'var(--red)':s<a.necessidade*.1&&a.necessidade>0?'var(--amber)':'var(--green)'}">${fmt(s)}</td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>`;
     }).join('');
   }
 }
@@ -801,7 +801,7 @@ function renderDesc() {
     const pv=Math.round(pct*100);
     const cls=pct>.9?'pbar-over':pct>.5?'pbar-low':'pbar-ok';
     const st=s<=0?['b-zero','Esgotado']:pct>.85?['b-low','Atenção']:['b-ok','OK'];
-    return <tr><td>${d.nome}</td><td class="num">${fmt(d.estoque)}</td><td class="num">${d.necessidade>0?fmt(d.necessidade):'—'}</td><td class="num">${fmt(d.distribuido)}</td><td class="num" style="font-weight:600;color:${s<=0?'var(--red)':'var(--ink)'}">${fmt(s)}</td><td><div class="pbar"><div class="pbar-fill ${cls}" style="width:${Math.min(pv,100)}%"></div></div><span style="font-size:10px;color:var(--muted)">${pv}% usado</span></td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>;
+    return `<tr><td>${d.nome}</td><td class="num">${fmt(d.estoque)}</td><td class="num">${d.necessidade>0?fmt(d.necessidade):'—'}</td><td class="num">${fmt(d.distribuido)}</td><td class="num" style="font-weight:600;color:${s<=0?'var(--red)':'var(--ink)'}">${fmt(s)}</td><td><div class="pbar"><div class="pbar-fill ${cls}" style="width:${Math.min(pv,100)}%"></div></div><span style="font-size:10px;color:var(--muted)">${pv}% usado</span></td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>`;
   }).join('');
 }
 
@@ -809,19 +809,19 @@ function renderRelatorio() {
   const ts=document.getElementById('rep-ts');
   if(ts) ts.textContent='Gerado em '+new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   const ta=document.getElementById('tbl-rep-alim');
-  if(ta) ta.innerHTML=alimentos.map(a=>{const s=a.arrecadado-a.entregue+a.devolvido;const c=a.entregue-a.devolvido;const st=s<=0?['b-zero','Esgotado']:a.arrecadado<a.necessidade?['b-low','Abaixo']:['b-ok','OK'];return <tr><td>${a.nome}</td><td class="num">${fmt(a.arrecadado)}</td><td class="num">${fmt(a.necessidade)}</td><td class="num">${fmt(c)}</td><td class="num" style="font-weight:600">${fmt(s)}</td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>;}).join('');
+  if(ta) ta.innerHTML=alimentos.map(a=>{const s=a.arrecadado-a.entregue+a.devolvido;const c=a.entregue-a.devolvido;const st=s<=0?['b-zero','Esgotado']:a.arrecadado<a.necessidade?['b-low','Abaixo']:['b-ok','OK'];return `<tr><td>${a.nome}</td><td class="num">${fmt(a.arrecadado)}</td><td class="num">${fmt(a.necessidade)}</td><td class="num">${fmt(c)}</td><td class="num" style="font-weight:600">${fmt(s)}</td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>`;}).join('');
   const td=document.getElementById('tbl-rep-desc');
-  if(td) td.innerHTML=descartaveis.map(d=>{const s=d.estoque-d.distribuido;const p=d.estoque>0?d.distribuido/d.estoque:0;const st=s<=0?['b-zero','Esgotado']:p>.85?['b-low','Atenção']:['b-ok','OK'];return <tr><td>${d.nome}</td><td class="num">${fmt(d.estoque)}</td><td class="num">${fmt(d.distribuido)}</td><td class="num" style="font-weight:600">${fmt(s)}</td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>;}).join('');
+  if(td) td.innerHTML=descartaveis.map(d=>{const s=d.estoque-d.distribuido;const p=d.estoque>0?d.distribuido/d.estoque:0;const st=s<=0?['b-zero','Esgotado']:p>.85?['b-low','Atenção']:['b-ok','OK'];return `<tr><td>${d.nome}</td><td class="num">${fmt(d.estoque)}</td><td class="num">${fmt(d.distribuido)}</td><td class="num" style="font-weight:600">${fmt(s)}</td><td><span class="badge ${st[0]}">${st[1]}</span></td></tr>`;}).join('');
   const tp=document.getElementById('tbl-rep-pedidos');
-  if(tp) tp.innerHTML=pedidos.length?pedidos.map(p=>{const bc={Pendente:'b-pend','A caminho':'b-onway',Entregue:'b-done',Devolução:'b-dev'}[p.status]||'b-low';return <tr><td>${p.hora}</td><td>${p.barraca}</td><td>${p.produto}</td><td class="num">${fmt(p.qtd)}</td><td><span class="badge ${bc}">${p.status}</span></td></tr>;}).join(''):'<tr class="empty-row"><td colspan="5">Nenhum pedido registrado.</td></tr>';
+  if(tp) tp.innerHTML=pedidos.length?pedidos.map(p=>{const bc={Pendente:'b-pend','A caminho':'b-onway',Entregue:'b-done',Devolução:'b-dev'}[p.status]||'b-low';return `<tr><td>${p.hora}</td><td>${p.barraca}</td><td>${p.produto}</td><td class="num">${fmt(p.qtd)}</td><td><span class="badge ${bc}">${p.status}</span></td></tr>`;}).join(''):'<tr class="empty-row"><td colspan="5">Nenhum pedido registrado.</td></tr>';
 }
 
 function renderBarracaDet() {
   const b=document.getElementById('sel-barraca-det')?.value||'Galinhada';
   const ta=document.getElementById('tbl-b-alim');const td=document.getElementById('tbl-b-desc');
   const ad=barraca_alim[b]||[];const dd=barraca_desc[b]||[];
-  if(ta) ta.innerHTML=ad.length?ad.map(r=><tr><td>${r.nome}</td><td class="num">${fmt(r.pedido)}</td><td class="num">${fmt(r.entregue)}</td><td class="num">${fmt(r.devolvido)}</td><td class="num" style="font-weight:600">${fmt(r.entregue-r.devolvido)}</td></tr>).join(''):'<tr class="empty-row"><td colspan="5">Sem alimentos registrados.</td></tr>';
-  if(td) td.innerHTML=dd.length?dd.map(r=><tr><td>${r.nome}</td><td class="num">${fmt(r.ent)}</td><td class="num">${fmt(r.dev)}</td><td class="num" style="font-weight:600">${fmt(r.ent-r.dev)}</td></tr>).join(''):'<tr class="empty-row"><td colspan="4">Sem descartáveis registrados.</td></tr>';
+  if(ta) ta.innerHTML=ad.length?ad.map(r=>`<tr><td>${r.nome}</td><td class="num">${fmt(r.pedido)}</td><td class="num">${fmt(r.entregue)}</td><td class="num">${fmt(r.devolvido)}</td><td class="num" style="font-weight:600">${fmt(r.entregue-r.devolvido)}</td></tr>`).join(''):'<tr class="empty-row"><td colspan="5">Sem alimentos registrados.</td></tr>';
+  if(td) td.innerHTML=dd.length?dd.map(r=>`<tr><td>${r.nome}</td><td class="num">${fmt(r.ent)}</td><td class="num">${fmt(r.dev)}</td><td class="num" style="font-weight:600">${fmt(r.ent-r.dev)}</td></tr>`).join(''):'<tr class="empty-row"><td colspan="4">Sem descartáveis registrados.</td></tr>';
 }
 
 // ══════════════════════════════════════════════════
@@ -846,14 +846,14 @@ function showPage(id) {
 // ══════════════════════════════════════════════════
 function exportCSV() {
   let csv='ALIMENTOS\nProduto,Arrecadado,Necessidade,Entregue,Devolvido,Saldo\n';
-  alimentos.forEach(a=>{const s=a.arrecadado-a.entregue+a.devolvido;csv+="${a.nome}",${a.arrecadado},${a.necessidade},${a.entregue},${a.devolvido},${s}\n;});
+  alimentos.forEach(a=>{const s=a.arrecadado-a.entregue+a.devolvido;csv+=`"${a.nome}",${a.arrecadado},${a.necessidade},${a.entregue},${a.devolvido},${s}\n`;});
   csv+='\nDESCARTÁVEIS\nProduto,Estoque,Necessidade,Distribuido,Saldo\n';
-  descartaveis.forEach(d=>{csv+="${d.nome}",${d.estoque},${d.necessidade},${d.distribuido},${d.estoque-d.distribuido}\n;});
+  descartaveis.forEach(d=>{csv+=`"${d.nome}",${d.estoque},${d.necessidade},${d.distribuido},${d.estoque-d.distribuido}\n`;});
   csv+='\nPEDIDOS\nHora,Barraca,Produto,Quantidade,Status\n';
-  pedidos.forEach(p=>{csv+="${p.hora}","${p.barraca}","${p.produto}",${p.qtd},"${p.status}"\n;});
+  pedidos.forEach(p=>{csv+=`"${p.hora}","${p.barraca}","${p.produto}",${p.qtd},"${p.status}"\n`;});
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=despensa_festa_junina_${new Date().toISOString().slice(0,10)}.csv;a.click();
+  a.download=`despensa_festa_junina_${new Date().toISOString().slice(0,10)}.csv`;a.click();
   toast('CSV exportado!');
 }
 
