@@ -160,32 +160,46 @@ tr:hover td{background:var(--cream);}
 <body>
 <div id="sync-bar"></div>
 
-<!-- ROLE SCREEN -->
-<div id="role-screen">
-  <div class="role-title-top">🎪 Despensa · Festa Junina 2026</div>
-  <div class="role-card" onclick="setRole('supervisor')">
-    <div class="role-icon">🖥️</div>
-    <div class="role-name">Supervisor</div>
-    <div class="role-desc">Dashboard, relatórios e gráficos</div>
-  </div>
-  <div class="role-card" onclick="setRole('estoque')">
-    <div class="role-icon">📦</div>
-    <div class="role-name">Membro do estoque</div>
-    <div class="role-desc">Registrar pedidos e devoluções</div>
-  </div>
-</div>
+<!-- ENTRY SCREEN (role + config combined) -->
+<div id="entry-screen" style="position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:999;padding:1.5rem;overflow-y:auto;">
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:1rem;">
 
-<!-- CONFIG SCREEN -->
-<div id="config-screen" style="display:none;align-items:center">
-  <div class="config-box">
-    <h2>🔗 Conectar ao Google Sheets</h2>
-    <p>Cole abaixo o link do Web App gerado pelo Apps Script da sua planilha.</p>
-    <input type="url" id="script-url-input" placeholder="https://script.google.com/macros/s/..." />
-    <small>Este link é salvo só neste navegador. Cada membro da equipe precisa colá-lo uma vez.</small>
-    <div style="display:flex;gap:8px">
-      <button class="btn primary" onclick="salvarConfig()">Conectar</button>
-      <button class="btn" onclick="usarModoDemo()">Usar modo demonstração</button>
+    <div style="text-align:center;color:rgba(255,255,255,.5);font-size:13px;font-style:italic;margin-bottom:.25rem;">
+      🎪 Despensa · Festa Junina 2026
     </div>
+
+    <!-- STEP 1: role -->
+    <div id="step-role" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="color:rgba(255,255,255,.35);font-size:11px;text-transform:uppercase;letter-spacing:.08em;text-align:center;">Quem é você?</div>
+      <div class="role-card" onclick="escolherPapel('supervisor')">
+        <div class="role-icon">🖥️</div>
+        <div class="role-name">Supervisor</div>
+        <div class="role-desc">Dashboard, relatórios e gráficos</div>
+      </div>
+      <div class="role-card" onclick="escolherPapel('estoque')">
+        <div class="role-icon">📦</div>
+        <div class="role-name">Membro do estoque</div>
+        <div class="role-desc">Registrar pedidos e devoluções</div>
+      </div>
+    </div>
+
+    <!-- STEP 2: URL -->
+    <div id="step-url" style="display:none;background:#fff;border-radius:14px;padding:1.75rem;">
+      <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:.4rem;">🔗 Link do Apps Script</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:1rem;font-style:italic;">
+        Cole o link gerado na Parte 1.4 do guia. Ele é salvo neste navegador — você só faz isso uma vez.
+      </div>
+      <input type="url" id="script-url-input"
+        placeholder="https://script.google.com/macros/s/..."
+        style="width:100%;font-size:13px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:Georgia,serif;margin-bottom:8px;"/>
+      <div id="url-erro" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none;">URL inválida. Copie o link que termina em /exec</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn primary" onclick="salvarConfig()" style="width:100%;padding:10px;font-size:14px;">Entrar no sistema</button>
+        <button class="btn" onclick="usarModoDemo()" style="width:100%;padding:10px;font-size:13px;">Usar modo demonstração (sem Google Sheets)</button>
+        <button class="btn" onclick="voltarEscolha()" style="width:100%;font-size:12px;color:var(--muted);">← Voltar</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -506,36 +520,47 @@ const ESTOQUE_PAGES = [
   {id:'descartaveis',icon:'◻️',label:'Estoque'},
 ];
 
-function setRole(role) {
+function escolherPapel(role) {
   currentRole = role;
-  document.getElementById('role-screen').style.display = 'none';
-
   const saved = localStorage.getItem('despensa_script_url');
   if (saved) {
     scriptURL = saved;
+    document.getElementById('entry-screen').style.display = 'none';
     iniciarApp();
   } else {
-    document.getElementById('config-screen').style.display = 'flex';
+    document.getElementById('step-role').style.display = 'none';
+    document.getElementById('step-url').style.display = 'block';
   }
+}
+
+function voltarEscolha() {
+  document.getElementById('step-url').style.display = 'none';
+  document.getElementById('step-role').style.display = 'flex';
+  document.getElementById('url-erro').style.display = 'none';
 }
 
 function salvarConfig() {
   const url = document.getElementById('script-url-input').value.trim();
+  const erro = document.getElementById('url-erro');
   if (!url.startsWith('https://script.google.com')) {
-    toast('URL inválida. Cole o link do Web App do Apps Script.');
+    erro.style.display = 'block';
     return;
   }
+  erro.style.display = 'none';
   scriptURL = url;
   localStorage.setItem('despensa_script_url', url);
-  document.getElementById('config-screen').style.display = 'none';
+  document.getElementById('entry-screen').style.display = 'none';
   iniciarApp();
 }
 
 function usarModoDemo() {
   modoDemo = true;
-  document.getElementById('config-screen').style.display = 'none';
+  document.getElementById('entry-screen').style.display = 'none';
   iniciarApp();
 }
+
+// Manter compatibilidade com chamadas antigas
+function setRole(role) { escolherPapel(role); }
 
 function iniciarApp() {
   document.getElementById('app').style.display = 'flex';
